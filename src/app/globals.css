@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --primary-green: #2d5a27;
+  --primary-blue: #1a4a6e;
+  --accent-orange: #e67e22;
+  --bg-dark: #0f1419;
+  --bg-card: #1a2332;
+  --text-light: #f0f4f8;
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-dark) 0%, #1a2332 50%, #0d2137 100%);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
+/* Progress bar animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+  }
+}
+
+.progress-bar-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Bike animation */
+@keyframes bike-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.bike-icon {
+  animation: bike-bounce 0.5s ease-in-out infinite;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Next sortie highlight */
+@keyframes highlight-pulse {
+  0%, 100% {
+    border-color: rgba(230, 126, 34, 0.5);
+  }
+  50% {
+    border-color: rgba(230, 126, 34, 1);
+  }
+}
+
+.next-sortie {
+  animation: highlight-pulse 2s ease-in-out infinite;
+  border-width: 2px;
+}
+
+/* Stats cards gradient */
+.stat-card {
+  background: linear-gradient(145deg, rgba(26, 35, 50, 0.9) 0%, rgba(15, 25, 35, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-orange);
+}

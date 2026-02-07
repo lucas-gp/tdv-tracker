@@ -1,0 +1,23 @@
+{
+  "target_km": 250,
+  "tdv_date": "2026-06-01",
+  "class_name": "CM1/CM2",
+  "teacher": "Sabrina",
+  "sorties": [
+    { "id": 1, "date": "2026-01-16", "creneau": "13h00-16h30", "km": null },
+    { "id": 2, "date": "2026-01-23", "creneau": "13h00-16h30", "km": null },
+    { "id": 3, "date": "2026-01-30", "creneau": "13h00-16h30", "km": null },
+    { "id": 4, "date": "2026-02-06", "creneau": "8h20-16h30", "km": null },
+    { "id": 5, "date": "2026-02-27", "creneau": "8h20-16h30", "km": null },
+    { "id": 6, "date": "2026-03-06", "creneau": "8h20-16h30", "km": null },
+    { "id": 7, "date": "2026-03-13", "creneau": "8h20-16h30", "km": null },
+    { "id": 8, "date": "2026-03-20", "creneau": "8h20-16h30", "km": null },
+    { "id": 9, "date": "2026-03-27", "creneau": "8h20-16h30", "km": null },
+    { "id": 10, "date": "2026-04-03", "creneau": "8h20-16h30", "km": null },
+    { "id": 11, "date": "2026-04-23", "creneau": "13h00-16h30", "km": null },
+    { "id": 12, "date": "2026-04-24", "creneau": "8h20-16h30", "km": null },
+    { "id": 13, "date": "2026-05-21", "creneau": "13h00-16h30", "km": null },
+    { "id": 14, "date": "2026-05-22", "creneau": "8h20-16h30", "km": null },
+    { "id": 15, "date": "2026-05-29", "creneau": "8h20-16h30", "km": null }
+  ]
+}
