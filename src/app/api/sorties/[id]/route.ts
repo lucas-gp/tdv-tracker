@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const dataPath = path.join(process.cwd(), 'data', 'sorties.json');
+import { getData, saveData } from '@/lib/kv-data';
 
 export async function DELETE(
   request: NextRequest,
@@ -13,20 +10,24 @@ export async function DELETE(
     const body = await request.json();
     const { password } = body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    const adminPassword = (process.env.ADMIN_PASSWORD || '').trim();
+    const userPassword = (password || '').trim();
+
+    if (!adminPassword || userPassword !== adminPassword) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const currentData = await getData();
     
     currentData.sorties = currentData.sorties.filter(
       (s: { id: number }) => s.id !== parseInt(id)
     );
     
-    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+    await saveData(currentData);
     
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('DELETE /api/sorties error:', error);
     return NextResponse.json({ error: 'Failed to delete sortie' }, { status: 500 });
   }
 }

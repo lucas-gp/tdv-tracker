@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const dataPath = path.join(process.cwd(), 'data', 'sorties.json');
+import { getData, saveData } from '@/lib/kv-data';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { password, date, creneau } = body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    const adminPassword = (process.env.ADMIN_PASSWORD || '').trim();
+    const userPassword = (password || '').trim();
+
+    if (!adminPassword || userPassword !== adminPassword) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const currentData = await getData();
     
     const maxId = currentData.sorties.reduce((max: number, s: { id: number }) => Math.max(max, s.id), 0);
     
@@ -29,10 +29,11 @@ export async function POST(request: NextRequest) {
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
     
-    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+    await saveData(currentData);
     
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('POST /api/sorties/add error:', error);
     return NextResponse.json({ error: 'Failed to add sortie' }, { status: 500 });
   }
 }

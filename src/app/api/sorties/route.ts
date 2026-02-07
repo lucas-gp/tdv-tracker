@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getData, saveData } from '@/lib/kv-data';
 
-const dataPath = path.join(process.cwd(), 'data', 'sorties.json');
+// Disable caching
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-    return NextResponse.json(data);
-  } catch {
+    const data = await getData();
+    const response = NextResponse.json(data);
+    // Ensure no caching
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
+  } catch (error) {
+    console.error('GET /api/sorties error:', error);
     return NextResponse.json({ error: 'Failed to read data' }, { status: 500 });
   }
 }
@@ -18,17 +22,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { password, sorties } = body;
 
-    if (password !== process.env.ADMIN_PASSWORD) {
+    const adminPassword = (process.env.ADMIN_PASSWORD || '').trim();
+    const userPassword = (password || '').trim();
+
+    if (!adminPassword || userPassword !== adminPassword) {
+      console.log('Password mismatch. Expected length:', adminPassword.length, 'Got length:', userPassword.length);
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const currentData = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+    const currentData = await getData();
     currentData.sorties = sorties;
     
-    fs.writeFileSync(dataPath, JSON.stringify(currentData, null, 2));
+    await saveData(currentData);
     
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error('POST /api/sorties error:', error);
     return NextResponse.json({ error: 'Failed to save data' }, { status: 500 });
   }
 }
