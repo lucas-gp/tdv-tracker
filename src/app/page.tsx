@@ -257,7 +257,7 @@ function EntryModal({
     
     if (!kmParcours || kmParcoursNum <= 0) {
       setStatus('error');
-      setErrorMessage('Entre les km parcourus ! 🚴');
+      setErrorMessage('Entre les km parcourus !');
       return;
     }
 
@@ -314,7 +314,7 @@ function EntryModal({
           <div className="text-center py-4 sm:py-8">
             <div className="text-6xl sm:text-8xl mb-4 animate-bounce">🎉</div>
             <h2 className="text-2xl sm:text-3xl font-bold text-white">Bravo !</h2>
-            <p className="text-green-100 mt-2 text-lg sm:text-xl">C&apos;est enregistré ! 🚴✨</p>
+            <p className="text-green-100 mt-2 text-lg sm:text-xl">C&apos;est enregistré ! <span className="bike-emoji">🚴</span>✨</p>
           </div>
         ) : (
           <>
@@ -334,7 +334,7 @@ function EntryModal({
               {/* Km input */}
               <div>
                 <label className="block text-white font-bold mb-2 text-base sm:text-lg">
-                  🚴 Combien de km avez-vous fait ?
+                  <span className="bike-emoji">🚴</span> Combien de km avez-vous fait ?
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -537,7 +537,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-2xl animate-pulse">🚴 Chargement...</div>
+        <div className="text-2xl animate-pulse"><span className="bike-emoji">🚴</span> Chargement...</div>
       </div>
     );
   }
@@ -627,7 +627,7 @@ export default function Home() {
       {/* Header */}
       <header className="text-center mb-8">
         <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3">
-          <span className="bike-icon">🚴</span>
+          <span className="bike-icon bike-emoji">🚴</span>
           <span className="bg-gradient-to-r from-green-400 via-blue-400 to-orange-400 bg-clip-text text-transparent">
             Traversée de la Drôme à Vélo 2026
           </span>
@@ -672,7 +672,7 @@ export default function Home() {
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
           <div 
-            className="absolute top-1/2 -translate-y-1/2 text-2xl transition-all duration-1000 ease-out bike-icon"
+            className="absolute top-1/2 -translate-y-1/2 text-2xl transition-all duration-1000 ease-out bike-icon bike-emoji"
             style={{ left: `calc(${Math.min(progress, 100)}% - 15px)` }}
           >
             🚴

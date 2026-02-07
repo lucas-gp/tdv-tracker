@@ -32,15 +32,16 @@ body {
 /* Bike animation */
 @keyframes bike-bounce {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) scaleX(-1);
   }
   50% {
-    transform: translateY(-3px);
+    transform: translateY(-3px) scaleX(-1);
   }
 }
 
 .bike-icon {
   animation: bike-bounce 0.5s ease-in-out infinite;
+  display: inline-block;
 }
 
 /* Card hover effect */
@@ -208,4 +209,10 @@ body {
   font-size: 3rem;
   animation: star-burst 1s ease-out forwards;
   z-index: 70;
+}
+
+/* Bike emoji flipped to face right */
+.bike-emoji {
+  display: inline-block;
+  transform: scaleX(-1);
 }
