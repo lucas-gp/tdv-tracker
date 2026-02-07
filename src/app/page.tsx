@@ -172,21 +172,78 @@ function Confetti() {
   return <>{elements}</>;
 }
 
+// Delete Confirmation Modal Component
+function DeleteConfirmModal({
+  sortieNumber,
+  onConfirm,
+  onCancel
+}: {
+  sortieNumber: number;
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    setDeleting(true);
+    await onConfirm();
+    setDeleting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal-backdrop">
+      <div className="bg-gradient-to-br from-red-900 to-pink-900 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border-4 border-red-400 modal-content">
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-4">🗑️</div>
+          <h2 className="text-2xl font-bold text-white">Supprimer les km ?</h2>
+          <p className="text-red-200 mt-2">Sortie {sortieNumber}</p>
+        </div>
+
+        <div className="bg-yellow-500/20 border-2 border-yellow-400/50 rounded-xl p-4 mb-6">
+          <p className="text-yellow-100 text-sm text-center">
+            ⚠️ <strong>Attention :</strong> Si des sorties suivantes ont été saisies, leurs exercices de calcul étaient basés sur cette valeur. Les km restent corrects car le système recalcule tout automatiquement.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl transition-all"
+          >
+            ❌ Annuler
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={deleting}
+            className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-400 hover:to-pink-400 text-white font-bold py-3 px-6 rounded-xl transition-all disabled:opacity-50"
+          >
+            {deleting ? '⏳' : '🗑️ Supprimer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Entry Modal Component
 function EntryModal({
   sortie,
   sortieNumber,
   kmBefore,
+  initialKm,
   onSave,
   onCancel
 }: {
   sortie: Sortie;
   sortieNumber: number;
   kmBefore: number;
+  initialKm?: number | null;
   onSave: (km: number) => Promise<boolean>;
   onCancel: () => void;
 }) {
-  const [kmParcours, setKmParcours] = useState('');
+  const [kmParcours, setKmParcours] = useState(initialKm ? String(initialKm) : '');
   const [result, setResult] = useState('');
   const [status, setStatus] = useState<'idle' | 'error' | 'success' | 'saving'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -359,8 +416,10 @@ export default function Home() {
   const [data, setData] = useState<SortiesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [pendingSortie, setPendingSortie] = useState<{ sortie: Sortie; index: number; kmBefore: number } | null>(null);
+  const [pendingSortie, setPendingSortie] = useState<{ sortie: Sortie; index: number; kmBefore: number; isEdit?: boolean } | null>(null);
   const [showEntryModal, setShowEntryModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ sortie: Sortie; index: number } | null>(null);
 
   const fetchData = useCallback(() => {
     fetch('/api/sorties')
@@ -377,20 +436,62 @@ export default function Home() {
     return !!sessionStorage.getItem('tdv_password');
   };
 
-  const handleSaisirClick = (sortie: Sortie, index: number, kmBefore: number) => {
+  const handleSaisirClick = (sortie: Sortie, index: number, kmBefore: number, isEdit: boolean = false) => {
     if (!isAuthenticated()) {
-      setPendingSortie({ sortie, index, kmBefore });
+      setPendingSortie({ sortie, index, kmBefore, isEdit });
       setShowPasswordModal(true);
     } else {
-      setPendingSortie({ sortie, index, kmBefore });
+      setPendingSortie({ sortie, index, kmBefore, isEdit });
       setShowEntryModal(true);
     }
+  };
+
+  const handleDeleteClick = (sortie: Sortie, index: number) => {
+    if (!isAuthenticated()) {
+      setPendingDelete({ sortie, index });
+      setShowPasswordModal(true);
+    } else {
+      setPendingDelete({ sortie, index });
+      setShowDeleteModal(true);
+    }
+  };
+
+  const handleDeleteConfirm = async (): Promise<void> => {
+    if (!data || !pendingDelete) return;
+
+    const password = sessionStorage.getItem('tdv_password');
+    if (!password) return;
+
+    const newSorties = data.sorties.map(s =>
+      s.id === pendingDelete.sortie.id ? { ...s, km: null } : s
+    );
+
+    try {
+      const res = await fetch('/api/sorties', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, sorties: newSorties })
+      });
+
+      if (res.ok) {
+        setData({ ...data, sorties: newSorties });
+      } else if (res.status === 401) {
+        sessionStorage.removeItem('tdv_password');
+      }
+    } catch {
+      // Error handling
+    }
+    
+    setShowDeleteModal(false);
+    setPendingDelete(null);
   };
 
   const handlePasswordSuccess = () => {
     setShowPasswordModal(false);
     if (pendingSortie) {
       setShowEntryModal(true);
+    } else if (pendingDelete) {
+      setShowDeleteModal(true);
     }
   };
 
@@ -428,7 +529,9 @@ export default function Home() {
   const handleCloseModals = () => {
     setShowPasswordModal(false);
     setShowEntryModal(false);
+    setShowDeleteModal(false);
     setPendingSortie(null);
+    setPendingDelete(null);
   };
 
   if (loading) {
@@ -508,7 +611,15 @@ export default function Home() {
           sortie={pendingSortie.sortie}
           sortieNumber={pendingSortie.index + 1}
           kmBefore={pendingSortie.kmBefore}
+          initialKm={pendingSortie.isEdit ? pendingSortie.sortie.km : undefined}
           onSave={handleSaveKm}
+          onCancel={handleCloseModals}
+        />
+      )}
+      {showDeleteModal && pendingDelete && (
+        <DeleteConfirmModal
+          sortieNumber={pendingDelete.index + 1}
+          onConfirm={handleDeleteConfirm}
           onCancel={handleCloseModals}
         />
       )}
@@ -602,15 +713,36 @@ export default function Home() {
                     </div>
                   </div>
                   
-                  <div className="text-right flex items-center gap-3">
+                  <div className="text-right flex items-center gap-2 sm:gap-3">
                     {sortie.km !== null ? (
-                      <div>
-                        <div className="text-xl font-bold text-green-400">
-                          {sortie.km} km
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <div className="text-xl font-bold text-green-400">
+                            {sortie.km} km
+                          </div>
+                          <div className="text-sm text-gray-400">
+                            Reste: {sortie.remainingAfter?.toFixed(1)} km
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-400">
-                          Reste: {sortie.remainingAfter?.toFixed(1)} km
-                        </div>
+                        {/* Edit/Delete buttons - only show if authenticated */}
+                        {isAuthenticated() && (
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => handleSaisirClick(sortie, index, sortie.kmBefore, true)}
+                              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-gray-600/50 hover:bg-gray-500/70 text-gray-300 hover:text-white rounded-lg transition-all text-sm sm:text-base"
+                              title="Modifier"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(sortie, index)}
+                              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-gray-600/50 hover:bg-red-500/70 text-gray-300 hover:text-white rounded-lg transition-all text-sm sm:text-base"
+                              title="Supprimer"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-gray-500 italic">
