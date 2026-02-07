@@ -120,6 +120,58 @@ function PasswordModal({
   );
 }
 
+// Confetti Component
+function Confetti() {
+  const confettiItems = ['🎉', '⭐', '✨', '🌟', '💫', '🎊', '🏆', '🎯'];
+  const elements = [];
+  
+  // Generate confetti
+  for (let i = 0; i < 20; i++) {
+    const emoji = confettiItems[Math.floor(Math.random() * confettiItems.length)];
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.5;
+    const duration = 2 + Math.random() * 1;
+    
+    elements.push(
+      <div
+        key={`confetti-${i}`}
+        className="confetti"
+        style={{
+          left: `${left}%`,
+          top: '-50px',
+          animationDelay: `${delay}s`,
+          animationDuration: `${duration}s`,
+        }}
+      >
+        {emoji}
+      </div>
+    );
+  }
+  
+  // Generate star bursts
+  for (let i = 0; i < 8; i++) {
+    const left = 10 + Math.random() * 80;
+    const top = 10 + Math.random() * 80;
+    const delay = Math.random() * 0.3;
+    
+    elements.push(
+      <div
+        key={`star-${i}`}
+        className="star-burst"
+        style={{
+          left: `${left}%`,
+          top: `${top}%`,
+          animationDelay: `${delay}s`,
+        }}
+      >
+        ⭐
+      </div>
+    );
+  }
+  
+  return <>{elements}</>;
+}
+
 // Entry Modal Component
 function EntryModal({
   sortie,
@@ -138,6 +190,7 @@ function EntryModal({
   const [result, setResult] = useState('');
   const [status, setStatus] = useState<'idle' | 'error' | 'success' | 'saving'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showBikeAnimation, setShowBikeAnimation] = useState(false);
 
   const kmParcoursNum = parseFloat(kmParcours) || 0;
   const correctAnswer = kmBefore - kmParcoursNum;
@@ -172,9 +225,11 @@ function EntryModal({
     
     if (success) {
       setStatus('success');
+      setShowBikeAnimation(true);
+      // Close modal after bike animation
       setTimeout(() => {
         onCancel();
-      }, 1500);
+      }, 2500);
     } else {
       setStatus('error');
       setErrorMessage('Erreur de sauvegarde 😕');
@@ -182,33 +237,46 @@ function EntryModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 modal-backdrop">
-      <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-600 to-emerald-700' : status === 'error' ? 'from-red-600 to-pink-700' : 'from-blue-600 to-cyan-700'} rounded-3xl p-8 max-w-lg w-full shadow-2xl border-4 ${status === 'success' ? 'border-green-300' : status === 'error' ? 'border-red-300' : 'border-blue-300'} modal-content transition-colors duration-300`}>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-2 sm:p-4 modal-backdrop overflow-hidden">
+      {/* Bike animation overlay */}
+      {showBikeAnimation && (
+        <>
+          <Confetti />
+          <div 
+            className="bike-ride-animation"
+            style={{ top: '50%' }}
+          >
+            🚴
+          </div>
+        </>
+      )}
+      
+      <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-600 to-emerald-700' : status === 'error' ? 'from-red-600 to-pink-700' : 'from-blue-600 to-cyan-700'} rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 w-full shadow-2xl border-4 ${status === 'success' ? 'border-green-300' : status === 'error' ? 'border-red-300' : 'border-blue-300'} modal-content transition-colors duration-300 max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto`}>
         
         {status === 'success' ? (
-          <div className="text-center py-8">
-            <div className="text-8xl mb-4 animate-bounce">🎉</div>
-            <h2 className="text-3xl font-bold text-white">Bravo !</h2>
-            <p className="text-green-100 mt-2 text-xl">C&apos;est enregistré ! 🚴✨</p>
+          <div className="text-center py-4 sm:py-8">
+            <div className="text-6xl sm:text-8xl mb-4 animate-bounce">🎉</div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">Bravo !</h2>
+            <p className="text-green-100 mt-2 text-lg sm:text-xl">C&apos;est enregistré ! 🚴✨</p>
           </div>
         ) : (
           <>
-            <div className="text-center mb-6">
-              <div className="text-5xl mb-2">📝</div>
-              <h2 className="text-2xl font-bold text-white">Sortie {sortieNumber}</h2>
-              <p className="text-blue-100">{formatDateFR(sortie.date)}</p>
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="text-4xl sm:text-5xl mb-2">📝</div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Sortie {sortieNumber}</h2>
+              <p className="text-blue-100 text-sm sm:text-base">{formatDateFR(sortie.date)}</p>
             </div>
 
             {/* Km before display */}
-            <div className="bg-white/20 rounded-2xl p-4 mb-6 text-center">
-              <div className="text-blue-100 text-sm mb-1">Km restants avant cette sortie</div>
-              <div className="text-4xl font-bold text-yellow-300">{kmBefore} km</div>
+            <div className="bg-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 text-center">
+              <div className="text-blue-100 text-xs sm:text-sm mb-1">Km restants avant cette sortie</div>
+              <div className="text-3xl sm:text-4xl font-bold text-yellow-300">{kmBefore} km</div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {/* Km input */}
               <div>
-                <label className="block text-white font-bold mb-2 text-lg">
+                <label className="block text-white font-bold mb-2 text-base sm:text-lg">
                   🚴 Combien de km avez-vous fait ?
                 </label>
                 <div className="flex items-center gap-2">
@@ -221,24 +289,24 @@ function EntryModal({
                       setKmParcours(e.target.value);
                       setStatus('idle');
                     }}
-                    className="flex-1 bg-white/90 border-4 border-white rounded-xl px-4 py-4 text-gray-900 text-center text-2xl font-bold focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/30"
+                    className="flex-1 bg-white/90 border-3 sm:border-4 border-white rounded-xl px-3 sm:px-4 py-3 sm:py-4 text-gray-900 text-center text-xl sm:text-2xl font-bold focus:outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-400/30"
                     placeholder="?"
                     autoFocus
                   />
-                  <span className="text-white text-xl font-bold">km</span>
+                  <span className="text-white text-lg sm:text-xl font-bold">km</span>
                 </div>
               </div>
 
               {/* Math exercise */}
               {kmParcours && kmParcoursNum > 0 && (
-                <div className="bg-yellow-400/20 rounded-2xl p-4 border-2 border-yellow-400/50">
-                  <label className="block text-white font-bold mb-3 text-lg text-center">
+                <div className="bg-yellow-400/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 border-2 border-yellow-400/50">
+                  <label className="block text-white font-bold mb-2 sm:mb-3 text-base sm:text-lg text-center">
                     🧮 Calcule le résultat !
                   </label>
-                  <div className="flex items-center justify-center gap-3 text-2xl">
-                    <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-bold">{kmBefore}</span>
+                  <div className="flex items-center justify-center gap-1 sm:gap-3 text-lg sm:text-2xl flex-wrap">
+                    <span className="bg-white/20 px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-white font-bold">{kmBefore}</span>
                     <span className="text-white font-bold">-</span>
-                    <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-bold">{kmParcoursNum}</span>
+                    <span className="bg-white/20 px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-white font-bold">{kmParcoursNum}</span>
                     <span className="text-white font-bold">=</span>
                     <input
                       type="number"
@@ -248,7 +316,7 @@ function EntryModal({
                         setResult(e.target.value);
                         setStatus('idle');
                       }}
-                      className="w-24 bg-white border-4 border-yellow-400 rounded-xl px-2 py-2 text-gray-900 text-center text-2xl font-bold focus:outline-none focus:ring-4 focus:ring-yellow-400/50"
+                      className="w-20 sm:w-24 bg-white border-3 sm:border-4 border-yellow-400 rounded-xl px-1 sm:px-2 py-1 sm:py-2 text-gray-900 text-center text-lg sm:text-2xl font-bold focus:outline-none focus:ring-4 focus:ring-yellow-400/50"
                       placeholder="?"
                     />
                   </div>
@@ -257,26 +325,26 @@ function EntryModal({
 
               {/* Error message */}
               {status === 'error' && (
-                <div className="bg-red-500/30 border-2 border-red-300 rounded-xl p-4 text-center animate-shake">
-                  <div className="text-white text-lg font-bold whitespace-pre-line">{errorMessage}</div>
+                <div className="bg-red-500/30 border-2 border-red-300 rounded-xl p-3 sm:p-4 text-center animate-shake">
+                  <div className="text-white text-base sm:text-lg font-bold whitespace-pre-line">{errorMessage}</div>
                 </div>
               )}
 
               {/* Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="flex-1 bg-gray-600/80 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded-xl transition-all text-lg"
+                  className="flex-1 bg-gray-600/80 hover:bg-gray-500 text-white font-bold py-3 sm:py-4 px-3 sm:px-6 rounded-xl transition-all text-sm sm:text-lg"
                 >
                   ❌ Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={status === 'saving'}
-                  className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-300 hover:to-emerald-400 text-gray-900 font-bold py-4 px-6 rounded-xl transition-all text-lg disabled:opacity-50"
+                  className="flex-1 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-300 hover:to-emerald-400 text-gray-900 font-bold py-3 sm:py-4 px-3 sm:px-6 rounded-xl transition-all text-sm sm:text-lg disabled:opacity-50"
                 >
-                  {status === 'saving' ? '⏳ Enregistrement...' : '✅ Valider'}
+                  {status === 'saving' ? '⏳' : '✅ Valider'}
                 </button>
               </div>
             </form>
