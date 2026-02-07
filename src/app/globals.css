@@ -145,20 +145,20 @@ body {
 @keyframes bike-ride {
   0% {
     left: -100px;
-    transform: translateY(-50%);
+    transform: translateY(-50%) scaleX(-1);
   }
   100% {
     left: calc(100% + 100px);
-    transform: translateY(-50%);
+    transform: translateY(-50%) scaleX(-1);
   }
 }
 
 @keyframes bike-wobble {
   0%, 100% {
-    transform: translateY(-50%) rotate(-2deg);
+    transform: translateY(-50%) scaleX(-1) rotate(-2deg);
   }
   50% {
-    transform: translateY(-55%) rotate(2deg);
+    transform: translateY(-55%) scaleX(-1) rotate(2deg);
   }
 }
 
