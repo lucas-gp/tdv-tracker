@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getData, saveData } from '@/lib/kv-data';
+import { getData, saveData } from '@/lib/db';
 
 // Disable caching
 export const dynamic = 'force-dynamic';

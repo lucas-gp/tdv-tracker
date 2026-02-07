@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getData, saveData } from '@/lib/kv-data';
+import { deleteSortie } from '@/lib/db';
 
 export async function DELETE(
   request: NextRequest,
@@ -17,13 +17,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const currentData = await getData();
-    
-    currentData.sorties = currentData.sorties.filter(
-      (s: { id: number }) => s.id !== parseInt(id)
-    );
-    
-    await saveData(currentData);
+    await deleteSortie(parseInt(id));
     
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getData, saveData } from '@/lib/kv-data';
+import { addSortie } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,23 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const currentData = await getData();
-    
-    const maxId = currentData.sorties.reduce((max: number, s: { id: number }) => Math.max(max, s.id), 0);
-    
-    currentData.sorties.push({
-      id: maxId + 1,
-      date,
-      creneau,
-      km: null
-    });
-    
-    // Sort by date
-    currentData.sorties.sort((a: { date: string }, b: { date: string }) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-    
-    await saveData(currentData);
+    await addSortie(date, creneau);
     
     return NextResponse.json({ success: true });
   } catch (error) {
